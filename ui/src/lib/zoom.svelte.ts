@@ -49,6 +49,8 @@ export function initZoom() {
 	// which takes every scroll in the app off the compositor thread and makes it wait for the main
 	// thread first. So it is bound only while a zoom gesture is actually in flight.
 	let bound = false;
+	// A real Ctrl key, as opposed to the synthetic ctrlKey a trackpad pinch carries.
+	let held = false;
 	const bindWheel = (on: boolean) => {
 		if (on === bound) return;
 		bound = on;
@@ -60,15 +62,15 @@ export function initZoom() {
 		// scroll continued from the same gesture is back on the compositor immediately.
 		if (!e.ctrlKey) return bindWheel(false);
 		e.preventDefault();
-		step(e.deltaY < 0 ? 1 : -1);
+		if (held) step(e.deltaY < 0 ? 1 : -1);
 	};
 	// `e.ctrlKey`, not `e.key === 'Control'`: Ctrl can already be held when the window takes focus,
 	// and then the first key event we see is some other key.
-	const track = (e: KeyboardEvent) => bindWheel(e.ctrlKey);
-	const release = () => bindWheel(false);
-	// A macOS trackpad pinch arrives as ctrl+wheel with no key event at all, so arm off the wheel as
-	// well. Passive, so this one costs the compositor nothing; it means a pinch loses its first
-	// notch and zooms from the second.
+	const track = (e: KeyboardEvent) => bindWheel((held = e.ctrlKey));
+	const release = () => bindWheel((held = false));
+	// A trackpad pinch arrives as ctrl+wheel with no key event at all. It must not rescale the UI, so
+	// arm off the wheel only to swallow it (`held` stays false) and keep the webview from zooming
+	// natively. Passive, so this one costs the compositor nothing.
 	const arm = (e: WheelEvent) => {
 		if (e.ctrlKey) bindWheel(true);
 	};
