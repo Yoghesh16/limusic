@@ -35,9 +35,11 @@ use rustypipe_botguard::{Botguard, Error as BgError};
 /// Bytes the minter wraps around `identifier + integrity token`. Measured with identifiers 11 and
 /// ~520 bytes long: `pot_len == ident_len + integrity_token_len + 14`, in both token classes.
 const POT_OVERHEAD: usize = 14;
-/// Largest integrity token whose pots googlevideo accepts. The two observed classes are 61-62
-/// (accepted) and 65-66 (rejected) with nothing in between, so the threshold sits in the gap.
-const ACCEPTED_MAX_IT: usize = 63;
+/// Largest integrity token whose pots googlevideo accepts. The two observed classes were 61-62
+/// (accepted) and 65-66 (rejected); by 2026-10 they had drifted to 63-64 and 67-68 (8 signed-out
+/// runtimes, range-GET past the unauthenticated head of one WEB_REMIX stream). 65 sits in the
+/// current gap and still rejects the old 66.
+const ACCEPTED_MAX_IT: usize = 65;
 /// How many bootstraps to spend looking for the accepted class. At the measured ~1-in-3 rate this
 /// misses about once in 25 launches; a miss keeps the last runtime and mints from it anyway.
 const MAX_BOOTSTRAPS: usize = 8;
