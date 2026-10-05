@@ -533,6 +533,7 @@ pub fn run() {
                 cipher.clone(),
                 potoken.clone(),
             ));
+            app.manage(potoken.clone());
 
             // OS media controls (MPRIS/SMTC/NowPlaying). Its callback resolves AppState lazily, so
             // it's fine to spawn before AppState is managed. context/16, D11.
@@ -937,6 +938,18 @@ pub fn run() {
             commands::log_ui,
         ])
         .on_window_event(|window, event| {
+            // Coming back to the window is the cue that a click is near: rebuild the BotGuard
+            // minter the idle teardown dropped, so it isn't built on the click. A no-op while warm.
+            if let tauri::WindowEvent::Focused(true) = event {
+                let app = window.app_handle();
+                if let (Some(potoken), Some(vd)) = (
+                    app.try_state::<Arc<PoTokenGenerator>>(),
+                    app.try_state::<Arc<AppState>>().and_then(|s| s.it.visitor_data()),
+                ) {
+                    let potoken = potoken.inner().clone();
+                    tauri::async_runtime::spawn(async move { potoken.prewarm(&vd).await });
+                }
+            }
             // Close-to-tray: ✕ hides the main window and playback keeps running; real quit is
             // the tray's Quit item (or the "close_to_tray=false" setting). Label-gated: the
             // hidden cipher/PoToken webviews are windows too and must close normally.
