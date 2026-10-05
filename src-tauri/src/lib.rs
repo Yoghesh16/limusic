@@ -423,7 +423,7 @@ pub fn run() {
             let (db, quarantined) = match Db::open_or_quarantine(&data_dir.join("limusic.sqlite")) {
                 Ok(v) => v,
                 Err(e) => fatal(
-                    "Limusic could not open or create its database",
+                    "YouTube Music could not open or create its database",
                     &format!("{}: {e}", data_dir.display()),
                 ),
             };
@@ -475,7 +475,7 @@ pub fn run() {
             let session = Session { locale: Locale::default(), visitor_data, data_sync_id, cookie };
             let it = match InnerTube::new(session, proxy.as_deref()) {
                 Ok(it) => it,
-                Err(e) => fatal("Limusic could not start its network client", &e.to_string()),
+                Err(e) => fatal("YouTube Music could not start its network client", &e.to_string()),
             };
             // Shelf titles, mood chips and playlist subtitles are YouTube's text, so the UI's
             // language has to go out with the request (#274). Persisted rather than pushed from the
@@ -495,7 +495,7 @@ pub fn run() {
             let mut player = match Player::new(&cache_dir.to_string_lossy()) {
                 Ok(p) => p,
                 Err(e) => fatal(
-                    "Limusic could not load libmpv, which it uses to play audio",
+                    "YouTube Music could not load libmpv, which it uses to play audio",
                     &format!(
                         "{e}. On Linux, install your distribution's mpv library \
                          (Fedora: mpv-libs, Debian/Ubuntu: libmpv2)."
@@ -518,7 +518,7 @@ pub fn run() {
             let events = match player.take_events() {
                 Some(ev) => ev,
                 None => fatal(
-                    "Limusic could not start its audio event loop",
+                    "YouTube Music could not start its audio event loop",
                     "the player's event channel was already taken, which is a bug",
                 ),
             };
@@ -974,6 +974,12 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|handle, event| {
+            // macOS: clicking the Dock icon with the main window hidden (⌘W close-to-tray) must
+            // bring it back; the tray is the only other way and a Dock click is the obvious one.
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen { has_visible_windows: false, .. } = &event {
+                tray::show_main(handle);
+            }
             // The hidden cipher/PoToken webviews are windows too, so closing the main window no
             // longer auto-exits the app. Quit when the main window is destroyed.
             if let tauri::RunEvent::WindowEvent {

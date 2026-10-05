@@ -20,7 +20,7 @@ pub fn track_changed(app: &AppHandle, title: &str, artists: &str) {
         return;
     }
     let mut n = notify_rust::Notification::new();
-    n.summary(title).body(artists).appname("Limusic");
+    n.summary(title).body(artists).appname("YouTube Music");
     #[cfg(all(unix, not(target_os = "macos")))]
     {
         // The binary name is the icon name the .deb/.rpm install. An AppImage has no themed icon,
