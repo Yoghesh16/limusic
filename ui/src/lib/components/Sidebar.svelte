@@ -75,7 +75,14 @@
 	)}"
 >
 	<div class="flex items-center justify-center px-2 py-2 {wide('lg:justify-between')}">
-		<span class="hidden font-heading text-lg font-bold tracking-tight {wide('lg:block')}">YouTube Music</span>
+		<span class="hidden items-center gap-1.5 font-heading text-xl font-semibold tracking-tight {wide('lg:flex')}">
+			<svg viewBox="0 0 24 24" class="size-6 shrink-0" aria-hidden="true">
+				<circle cx="12" cy="12" r="12" fill="#FF0000" />
+				<circle cx="12" cy="12" r="6.6" fill="none" stroke="#fff" stroke-width="1.2" />
+				<path d="M10 8.9v6.2l5.2-3.1z" fill="#fff" />
+			</svg>
+			Music
+		</span>
 		<!-- Column when collapsed: the two buttons don't fit side by side in the 64px rail. -->
 		<div class="flex items-center gap-1 {collapsed ? 'flex-col' : ''}">
 			<Button
